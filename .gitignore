@@ -1,0 +1,34 @@
+# Flutter/Dart
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.g.dart
+.packages
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+
+# macOS
+macos/Pods/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Miscellaneous
+*.log
+
+# Secrets
+.env
+.env.*
+
+# Claude local settings
+.claude/
