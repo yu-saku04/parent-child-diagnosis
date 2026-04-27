@@ -93,6 +93,8 @@ class TalentResultLogic {
       '今日からできること：${data.dailyAdvice}',
     ];
 
+    final goodPoints = _getGoodPoints(data);
+
     return ResultDetail(
       resultType: dominantType,
       typeLabel: data.label,
@@ -100,8 +102,16 @@ class TalentResultLogic {
       detailComment: detailComment,
       categoryScores: categoryScores,
       improvements: improvements,
+      goodPoints: goodPoints,
       aiAdvice: '',
     );
+  }
+
+  static List<String> _getGoodPoints(_TypeData data) {
+    return [
+      '${data.strengths[0]}という強みがあります',
+      if (data.strengths.length > 1) '${data.strengths[1]}という特徴が見られます',
+    ];
   }
 
   static String _getDominantType(Map<String, int> counts, List<AnswerRecord> answers) {

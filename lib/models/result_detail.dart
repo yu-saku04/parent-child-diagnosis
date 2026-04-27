@@ -24,6 +24,7 @@ class ResultDetail {
   final String detailComment;
   final List<CategoryScore> categoryScores;
   final List<String> improvements;
+  final List<String> goodPoints;
   final String aiAdvice;
 
   const ResultDetail({
@@ -33,6 +34,7 @@ class ResultDetail {
     required this.detailComment,
     required this.categoryScores,
     required this.improvements,
+    this.goodPoints = const [],
     required this.aiAdvice,
   });
 }

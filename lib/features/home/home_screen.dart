@@ -9,6 +9,7 @@ import '../../providers/history_provider.dart';
 import '../../widgets/diagnosis_card.dart';
 import '../../widgets/premium_badge.dart';
 import '../diagnosis/diagnosis_question_screen.dart';
+import '../diagnosis/talent/talent_age_select_screen.dart';
 import '../history/history_screen.dart';
 import '../subscription/subscription_screen.dart';
 import '../settings/settings_screen.dart';
@@ -30,12 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startDiagnosis(DiagnosisType type) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DiagnosisQuestionScreen(type: type),
-      ),
-    );
+    if (type == DiagnosisType.talent) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TalentAgeSelectScreen()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => DiagnosisQuestionScreen(type: type)),
+      );
+    }
   }
 
   void _openHistory() {

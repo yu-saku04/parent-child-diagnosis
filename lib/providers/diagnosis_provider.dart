@@ -17,6 +17,7 @@ class DiagnosisProvider extends ChangeNotifier {
   final AiService _aiService = AiService();
 
   DiagnosisType? _currentType;
+  String? _talentAgeGroup;
   List<Question> _questions = [];
   int _currentIndex = 0;
   final List<Choice?> _answers = [];
@@ -41,8 +42,9 @@ class DiagnosisProvider extends ChangeNotifier {
   bool get isSaved => _isSaved;
   bool get isLastQuestion => _currentIndex == _questions.length - 1;
 
-  void startDiagnosis(DiagnosisType type) {
+  void startDiagnosis(DiagnosisType type, {String? ageGroup}) {
     _currentType = type;
+    _talentAgeGroup = ageGroup;
     _currentIndex = 0;
     _lastResult = null;
     _lastResultDetail = null;
@@ -53,7 +55,7 @@ class DiagnosisProvider extends ChangeNotifier {
         _questions = StressQuestions.questions;
         break;
       case DiagnosisType.talent:
-        _questions = TalentQuestions.questions;
+        _questions = TalentQuestions.getQuestionsForAge(ageGroup ?? '5-7');
         break;
       case DiagnosisType.ngBehavior:
         _questions = NgBehaviorQuestions.questions;
@@ -114,8 +116,24 @@ class DiagnosisProvider extends ChangeNotifier {
       isPremium: isPremium,
     );
 
-    final totalScore = answers.fold<int>(0, (sum, a) => sum + a.score);
-    final maxScore = _currentType == DiagnosisType.talent ? 20 : 45;
+    int totalScore;
+    int maxScore;
+    if (_currentType == DiagnosisType.talent) {
+      // 才能診断はタイプ別票数。スコア = 最多タイプの票数 / 質問数
+      final typeCount = <String, int>{'logical': 0, 'emotional': 0, 'active': 0, 'stable': 0};
+      for (final a in answers) {
+        if (a.typeKey != null && typeCount.containsKey(a.typeKey)) {
+          typeCount[a.typeKey!] = typeCount[a.typeKey!]! + 1;
+        }
+      }
+      totalScore = typeCount.values.isEmpty
+          ? 0
+          : typeCount.values.reduce((a, b) => a > b ? a : b);
+      maxScore = _questions.length;
+    } else {
+      totalScore = answers.fold<int>(0, (sum, a) => sum + a.score);
+      maxScore = 45;
+    }
 
     final result = DiagnosisResult(
       id: _uuid.v4(),
@@ -140,6 +158,7 @@ class DiagnosisProvider extends ChangeNotifier {
       detailComment: detail.detailComment,
       categoryScores: detail.categoryScores,
       improvements: detail.improvements,
+      goodPoints: detail.goodPoints,
       aiAdvice: aiAdvice,
     );
     notifyListeners();
@@ -170,6 +189,7 @@ class DiagnosisProvider extends ChangeNotifier {
 
   void reset() {
     _currentType = null;
+    _talentAgeGroup = null;
     _questions = [];
     _currentIndex = 0;
     _answers.clear();

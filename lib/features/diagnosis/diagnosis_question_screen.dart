@@ -11,8 +11,9 @@ import 'diagnosis_simple_result_screen.dart';
 
 class DiagnosisQuestionScreen extends StatefulWidget {
   final DiagnosisType type;
+  final String? ageGroup;
 
-  const DiagnosisQuestionScreen({super.key, required this.type});
+  const DiagnosisQuestionScreen({super.key, required this.type, this.ageGroup});
 
   @override
   State<DiagnosisQuestionScreen> createState() =>
@@ -24,7 +25,7 @@ class _DiagnosisQuestionScreenState extends State<DiagnosisQuestionScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DiagnosisProvider>().startDiagnosis(widget.type);
+      context.read<DiagnosisProvider>().startDiagnosis(widget.type, ageGroup: widget.ageGroup);
     });
   }
 
@@ -307,7 +308,7 @@ class _ChoiceButton extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isSelected ? color : AppColors.background,
+                color: isSelected ? color : const Color(0xFFEEEFF3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(

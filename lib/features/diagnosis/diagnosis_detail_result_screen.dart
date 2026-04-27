@@ -53,6 +53,10 @@ class DiagnosisDetailResultScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _buildDetailCommentCard(detail.detailComment),
             const SizedBox(height: 16),
+            if (detail.goodPoints.isNotEmpty) ...[
+              _buildGoodPointsSection(detail.goodPoints),
+              const SizedBox(height: 16),
+            ],
             _buildCategorySection(detail.categoryScores, color),
             const SizedBox(height: 16),
             _buildImprovementsSection(detail.improvements),
@@ -125,6 +129,19 @@ class DiagnosisDetailResultScreen extends StatelessWidget {
       icon: Icons.bar_chart,
       child: Column(
         children: scores.map((cat) => _CategoryBar(cat: cat, color: color)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildGoodPointsSection(List<String> goodPoints) {
+    return _SectionCard(
+      title: 'できていること・良い点',
+      icon: Icons.thumb_up_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: goodPoints
+            .map((item) => _GoodPointItem(text: item))
+            .toList(),
       ),
     );
   }
@@ -270,6 +287,30 @@ class _CategoryBar extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(cat.advice, style: AppTextStyles.caption),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoodPointItem extends StatelessWidget {
+  final String text;
+
+  const _GoodPointItem({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.check_circle_outline, size: 18, color: AppColors.secondary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: AppTextStyles.body)),
         ],
       ),
     );

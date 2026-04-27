@@ -30,6 +30,48 @@ class NgBehaviorResultLogic {
     ),
   };
 
+  static const _simpleCommentPatterns = {
+    'stable': [
+      '子どもとの関わりが安定しています。このままのペースを大切にしていきましょう。',
+      '日々の関わりにバランスが取れています。これからも今の接し方を続けてください。',
+      '関わり方に余裕が感じられます。小さな工夫が積み重なっているのかもしれません。',
+    ],
+    'mild': [
+      '一部に改善の余地があります。余裕がないときの対応を少し意識してみましょう。',
+      'ほとんどの関わりは適切です。いくつかの場面で少し工夫できるかもしれません。',
+      '大枠は安定していますが、疲れているときに出やすいパターンが見られます。',
+    ],
+    'review': [
+      '関わりに偏りがある傾向があります。スコアの高いカテゴリから一つだけ見直してみましょう。',
+      '特定の場面でパターンが出やすいかもしれません。まずは一つだけ変えてみましょう。',
+      '気になるポイントがあります。完璧を目指さず、一歩ずつ取り組んでいきましょう。',
+    ],
+    'urgent': [
+      '余裕のなさが関わり方に影響している可能性があります。焦らず、小さな改善から始めましょう。',
+      '親自身が疲れているサインかもしれません。まずは自分を休めることを最優先にしてください。',
+      '今は難しい時期かもしれません。一人で抱え込まず、周囲のサポートを求めてみましょう。',
+    ],
+  };
+
+  static const _detailCommentPatterns = {
+    'stable': [
+      '日々の関わりは安定している傾向があります。子どもとの関係を大切にしながら、このペースを続けていきましょう。定期的に振り返ることで、さらに良い関わりにつなげられます。',
+      '全体的にバランスの取れた関わりができています。ストレスが高い日でも崩れにくいペースが身についているのかもしれません。引き続き、子どもの気持ちに寄り添い続けてください。',
+    ],
+    'mild': [
+      '一部の場面で改善の余地がある傾向があります。特に余裕のない時に出やすいパターンを意識するだけで、関係が変わってくることがあります。少しずつ取り組んでいきましょう。',
+      '概ね安定した関わりができていますが、疲れているときや忙しいときに出やすいパターンがあるようです。「今日は余裕がない」と気づいたときだけ、一つだけ意識してみてください。',
+    ],
+    'review': [
+      '関わりに偏りがある傾向があります。特定の場面で同じパターンが出やすいことがあります。まずは「最後まで聞く」ことを意識するだけでも、子どもとの関係に変化が生まれやすくなります。',
+      '気になるカテゴリがいくつかあります。一度に全部を変えようとするより、「今週はこれだけ」と一つに絞って取り組む方が続きやすいです。',
+    ],
+    'urgent': [
+      '余裕のなさが関わり方に影響している可能性があります。まず親自身が少し楽になることが大切です。完璧な親でなくて大丈夫です。叱ってしまっても「さっきはごめんね」と修復できれば、関係は回復していきます。',
+      '今、親自身がとても大変な状況にあるのかもしれません。子どもへの関わりを変えようとする前に、まず自分を休ませてください。必要に応じて専門機関への相談も大切な選択肢です。',
+    ],
+  };
+
   static ResultDetail calculate(List<AnswerRecord> answers) {
     final catScores = <String, int>{
       'anticipation': 0,
@@ -49,8 +91,8 @@ class NgBehaviorResultLogic {
 
     final resultType = _getResultType(total);
     final typeLabel = _getTypeLabel(resultType);
-    final simpleComment = _getSimpleComment(resultType);
-    final detailComment = _getDetailComment(resultType);
+    final simpleComment = _pickPattern(_simpleCommentPatterns[resultType], total);
+    final detailComment = _pickPattern(_detailCommentPatterns[resultType], total);
 
     final categoryScores = catScores.entries.map((e) {
       final info = _categories[e.key]!;
@@ -65,6 +107,7 @@ class NgBehaviorResultLogic {
       ..sort((a, b) => b.percentage.compareTo(a.percentage));
 
     final improvements = _getImprovements(catScores);
+    final goodPoints = _getGoodPoints(catScores);
 
     return ResultDetail(
       resultType: resultType,
@@ -73,8 +116,14 @@ class NgBehaviorResultLogic {
       detailComment: detailComment,
       categoryScores: categoryScores,
       improvements: improvements,
+      goodPoints: goodPoints,
       aiAdvice: '',
     );
+  }
+
+  static String _pickPattern(List<String>? patterns, int seed) {
+    if (patterns == null || patterns.isEmpty) return '';
+    return patterns[seed % patterns.length];
   }
 
   static String _getResultType(int total) {
@@ -91,36 +140,6 @@ class NgBehaviorResultLogic {
       case 'review': return '偏りあり';
       case 'urgent': return '要見直し';
       default: return '－';
-    }
-  }
-
-  static String _getSimpleComment(String resultType) {
-    switch (resultType) {
-      case 'stable':
-        return '関わりは安定しています。このまま継続していきましょう。';
-      case 'mild':
-        return '一部に改善の余地があります。余裕がない時の対応を少し見直しましょう。';
-      case 'review':
-        return '関わりに偏りがあります。まずは話をじっくり聞く時間を意識してみましょう。';
-      case 'urgent':
-        return '余裕のなさが影響している可能性があります。焦らず、小さな改善から始めましょう。';
-      default:
-        return '';
-    }
-  }
-
-  static String _getDetailComment(String resultType) {
-    switch (resultType) {
-      case 'stable':
-        return '日々の関わりは安定している傾向があります。子どもとの関係を大切にしながら、このペースを続けていきましょう。定期的に振り返ることで、さらに良い関わりにつなげられます。';
-      case 'mild':
-        return '一部の場面で改善の余地がある傾向があります。特に余裕のない時に出やすいパターンを意識するだけで、関係が変わってくることがあります。少しずつ取り組んでいきましょう。';
-      case 'review':
-        return '関わりに偏りがある傾向があります。特定の場面で同じパターンが出やすいことがあります。まずは「最後まで聞く」ことを意識するだけでも、子どもとの関係に変化が生まれやすくなります。';
-      case 'urgent':
-        return '余裕のなさが関わり方に影響している可能性があります。まず親自身が少し楽になることが大切です。完璧な親でなくて大丈夫です。叱ってしまっても「さっきはごめんね」と修復できれば、関係は回復していきます。必要に応じて専門機関への相談も選択肢の一つです。';
-      default:
-        return '';
     }
   }
 
@@ -146,6 +165,30 @@ class NgBehaviorResultLogic {
     }
 
     return improvements;
+  }
+
+  static List<String> _getGoodPoints(Map<String, int> catScores) {
+    final goodPoints = <String>[];
+
+    if ((catScores['anticipation'] ?? 0) <= 3) {
+      goodPoints.add('先回りせず、子どもの意思を尊重できています');
+    }
+    if ((catScores['interrupting'] ?? 0) <= 2) {
+      goodPoints.add('子どもの話をしっかり聞けています');
+    }
+    if ((catScores['scolding'] ?? 0) <= 2) {
+      goodPoints.add('否定的な言葉を控えられています');
+    }
+    if ((catScores['results'] ?? 0) <= 2) {
+      goodPoints.add('プロセスを大切にした関わりができています');
+    }
+    if ((catScores['emotion'] ?? 0) <= 1) {
+      goodPoints.add('感情的になることが少なく、安定した対応ができています');
+    }
+
+    return goodPoints.isEmpty
+        ? ['この診断に向き合っていること自体、素晴らしい一歩です']
+        : goodPoints;
   }
 }
 
